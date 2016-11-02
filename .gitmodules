@@ -1,0 +1,3 @@
+[submodule "JVM/lib/gson"]
+	path = JVM/lib/gson
+	url = https://github.com/google/gson.git
