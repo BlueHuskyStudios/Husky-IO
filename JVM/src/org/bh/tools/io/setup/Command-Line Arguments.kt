@@ -147,8 +147,8 @@ open class CommandLineArgParser(val expectedArgs: CommandlineArgCollection) {
     fun parseArgs(userArgs: Array<String>): List<CommandLineArg<*>> {
         return userArgs.filterMap { arg ->
             val match = expectedArgs.args.firstOrNull { it.regex.matches(arg) }
-            Pair(match != null, { match!! })
-        }
+            Pair(match != null, { match })
+        }.requireNoNulls()
     }
 }
 
