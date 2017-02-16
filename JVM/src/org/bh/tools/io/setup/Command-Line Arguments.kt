@@ -17,10 +17,13 @@ data class CompleteCommandLineArg<out ActionOutput>(
         override val fullTextArgument: String,
         override val description: String,
         override val action: (Array<String>) -> ActionOutput
-) : SingleCharacterCommandLineArg<ActionOutput>, FullTextCommandLineArg<ActionOutput> {
-    override val regex: Regex
-        get() = Regex("(${super<FullTextCommandLineArg>.regex.pattern}" +
+) : SingleCharacterCommandLineArg<ActionOutput>,
+        FullTextCommandLineArg<ActionOutput>
+{
+    override val regex by lazy {
+        Regex("(${super<FullTextCommandLineArg>.regex.pattern}" +
                 "|${super<SingleCharacterCommandLineArg>.regex.pattern})")
+    }
 }
 
 /**
