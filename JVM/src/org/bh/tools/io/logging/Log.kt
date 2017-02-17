@@ -1,3 +1,8 @@
+@file:Suppress(
+        "NOTHING_TO_INLINE", // These are inlined so the debugger properly reflects the method/class where logging took place
+        "unused"
+)
+
 package org.bh.tools.io.logging
 
 import org.bh.tools.io.logging.LogLevel.*
@@ -13,67 +18,152 @@ import java.util.logging.Logger
  * @author Kyli Rouge
  * @since 2016-11-04
  */
-object Log {
+class Log(val defaultLogger: Logger) {
     /**
-     * The basis of [Log]
+     * The basis of [Log]; logs the given message using the given logger at the given log level
      *
-     * @param logger  The logger which will do the grunt work of logging messages
-     * @param level   The level by which to log the message
-     * @param message The message to log. If `null`, `"null"` is logged.
+     * @param message The message to log. If `null`, `"null"` is logged
+     * @param logger  _optional_ - The logger which will do the grunt work of logging messages; defaults to [defaultLogger]
+     * @param level   _optional_ - The level by which to log the message; defaults to [debug][LogLevel.debug]
      */
-    fun log(message: Any?, logger: Logger = Logger.getGlobal(), level: LogLevel = debug)
+    inline fun print(message: Any?, logger: Logger = defaultLogger, level: LogLevel = debug)
             = logger.log(level.javaValue, message.toString())
 
-    /**
-     * Shorthand for [log] with [never] level. So... why would you call this, again?
-     */
-    fun x(message: Any?, logger: Logger = Logger.getGlobal()) = log(message, logger, never)
 
     /**
-     * Shorthand for [log] with [finest] level
+     * Shorthand for [print] with [never] level. So... why would you call this, again?
      */
-    fun f3(message: Any?, logger: Logger = Logger.getGlobal()) = log(message, logger, finest)
+    inline fun never(message: Any?, logger: Logger = defaultLogger) = print(message, logger, never)
 
     /**
-     * Shorthand for [log] with [finer] level
+     * Shorthand for [print] with [never] level. So... why would you call this, again?
      */
-    fun f2(message: Any?, logger: Logger = Logger.getGlobal()) = log(message, logger, finer)
+    inline fun x(message: Any?, logger: Logger = defaultLogger) = never(message, logger)
+
 
     /**
-     * Shorthand for [log] with [fine] level
+     * Shorthand for [print] with [verbose][LogLevel.verbose] level
      */
-    fun f1(message: Any?, logger: Logger = Logger.getGlobal()) = log(message, logger, fine)
+    inline fun verbose(message: Any?, logger: Logger = defaultLogger) = print(message, logger, LogLevel.verbose)
 
     /**
-     * Shorthand for [log] with [fine] level
+     * Shorthand for [print] with [verbose][LogLevel.verbose] level
      */
-    fun f(message: Any?, logger: Logger = Logger.getGlobal()) = f1(message, logger)
+    inline fun v(message: Any?, logger: Logger = defaultLogger) = finest(message, logger)
+
 
     /**
-     * Shorthand for [log] with [debug] level
+     * Shorthand for [print] with [finest][LogLevel.finest] level
      */
-    fun d(message: Any?, logger: Logger = Logger.getGlobal()) = log(message, logger, debug)
+    inline fun finest(message: Any?, logger: Logger = defaultLogger) = print(message, logger, finest)
 
     /**
-     * Shorthand for [log] with [info] level
+     * Shorthand for [print] with [finest][LogLevel.finest] level
      */
-    fun i(message: Any?, logger: Logger = Logger.getGlobal()) = log(message, logger, info)
+    inline fun f3(message: Any?, logger: Logger = defaultLogger) = finest(message, logger)
+
 
     /**
-     * Shorthand for [log] with [warning] level
+     * Shorthand for [print] with [finer][LogLevel.finer] level
      */
-    fun w(message: Any?, logger: Logger = Logger.getGlobal()) = log(message, logger, warning)
+    inline fun finer(message: Any?, logger: Logger = defaultLogger) = print(message, logger, finer)
 
     /**
-     * Shorthand for [log] with [severe] level
+     * Shorthand for [print] with [finer][LogLevel.finer] level
      */
-    fun s(message: Any?, logger: Logger = Logger.getGlobal()) = log(message, logger, severe)
+    inline fun f2(message: Any?, logger: Logger = defaultLogger) = finer(message, logger)
+
 
     /**
-     * Shorthand for [log] with [always] level
+     * Shorthand for [print] with [fine][LogLevel.fine] level
      */
-    fun a(message: Any?, logger: Logger = Logger.getGlobal()) = log(message, logger, always)
+    inline fun fine(message: Any?, logger: Logger = defaultLogger) = print(message, logger, fine)
+
+    /**
+     * Shorthand for [print] with [fine][LogLevel.fine] level
+     */
+    inline fun f1(message: Any?, logger: Logger = defaultLogger) = fine(message, logger)
+
+    /**
+     * Shorthand for [print] with [fine][LogLevel.fine] level
+     */
+    inline fun f(message: Any?, logger: Logger = defaultLogger) = fine(message, logger)
+
+
+    /**
+     * Shorthand for [print] with [debug][LogLevel.debug] level
+     */
+    inline fun debug(message: Any?, logger: Logger = defaultLogger) = print(message, logger, debug)
+
+    /**
+     * Shorthand for [print] with [debug][LogLevel.debug] level
+     */
+    inline fun d(message: Any?, logger: Logger = defaultLogger) = debug(message, logger)
+
+
+    /**
+     * Shorthand for [print] with [info][LogLevel.info] level
+     */
+    inline fun info(message: Any?, logger: Logger = defaultLogger) = print(message, logger, info)
+
+    /**
+     * Shorthand for [print] with [info][LogLevel.info] level
+     */
+    inline fun i(message: Any?, logger: Logger = defaultLogger) = info(message, logger)
+
+
+    /**
+     * Shorthand for [print] with [warning][LogLevel.warning] level
+     */
+    inline fun warning(message: Any?, logger: Logger = defaultLogger) = print(message, logger, warning)
+
+    /**
+     * Shorthand for [print] with [warning][LogLevel.warning] level
+     */
+    inline fun warn(message: Any?, logger: Logger = defaultLogger) = warning(message, logger)
+
+    /**
+     * Shorthand for [print] with [warning][LogLevel.warning] level
+     */
+    inline fun w(message: Any?, logger: Logger = defaultLogger) = warning(message, logger)
+
+
+    /**
+     * Shorthand for [print] with [severe][LogLevel.error] level
+     */
+    inline fun error(message: Any?, logger: Logger = defaultLogger) = print(message, logger, LogLevel.error)
+
+    /**
+     * Shorthand for [print] with [severe][LogLevel.error] level
+     */
+    inline fun e(message: Any?, logger: Logger = defaultLogger) = severe(message, logger)
+
+
+    /**
+     * Shorthand for [print] with [severe][LogLevel.severe] level
+     */
+    inline fun severe(message: Any?, logger: Logger = defaultLogger) = print(message, logger, severe)
+
+    /**
+     * Shorthand for [print] with [severe][LogLevel.severe] level
+     */
+    inline fun s(message: Any?, logger: Logger = defaultLogger) = severe(message, logger)
+
+
+    /**
+     * Shorthand for [print] with [always][LogLevel.always] level
+     */
+    inline fun always(message: Any?, logger: Logger = defaultLogger) = print(message, logger, always)
+
+    /**
+     * Shorthand for [print] with [always][LogLevel.always] level
+     */
+    inline fun a(message: Any?, logger: Logger = defaultLogger) = always(message, logger)
 }
+
+val log = Log(Logger.getGlobal())
+
+
 
 enum class LogLevel(val javaValue: Level) {
     /**
@@ -129,6 +219,15 @@ enum class LogLevel(val javaValue: Level) {
         /**
          * Gosh your log is huge! This is where all that needlessly-detailed info should go.
          */
-        val verbose = finest
+        @JvmStatic
+        inline val verbose get() = finest
+
+
+        /**
+         * An urgent message about a problem that the user would want to see. Will most likely be presented to the user
+         * through the UI.
+         */
+        @JvmStatic
+        inline val error get() = severe
     }
 }
