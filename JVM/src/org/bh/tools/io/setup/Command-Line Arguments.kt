@@ -1,6 +1,12 @@
 package org.bh.tools.io.setup
 
-import org.bh.tools.base.collections.filterMap
+import org.bh.tools.base.abstraction.Integer
+import org.bh.tools.base.collections.*
+import org.bh.tools.base.math.max
+import org.bh.tools.io.logging.log
+import org.bh.tools.io.logging.write
+import java.io.OutputStream
+import java.util.regex.Pattern
 
 /**
  * Copyright BHStudios ©2016 BH-1-PS. Made for Snek.
@@ -12,19 +18,26 @@ import org.bh.tools.base.collections.filterMap
  * @author Kyli Rouge
  * @since 2016-11-02
  */
-data class CompleteCommandLineArg<out ActionOutput>(
+open class CompleteCommandLineArg<out ActionOutput>(
         override val singleCharacterArgument: Char,
         override val fullTextArgument: String,
         override val description: String,
         override val action: (Array<String>) -> ActionOutput
 ) : SingleCharacterCommandLineArg<ActionOutput>,
-        FullTextCommandLineArg<ActionOutput>
-{
+        FullTextCommandLineArg<ActionOutput> {
     override val regex by lazy {
         Regex("(${super<FullTextCommandLineArg>.regex.pattern}" +
                 "|${super<SingleCharacterCommandLineArg>.regex.pattern})")
     }
+
+    override val allArgumentStrings by lazy {
+        listOf(
+                SingleCharacterCommandLineArg.prefix + singleCharacterArgument,
+                FullTextCommandLineArg.prefix + fullTextArgument
+        )
+    }
 }
+
 
 /**
  * Copyright BHStudios ©2016 BH-1-PS. Made for Snek.
@@ -49,12 +62,16 @@ interface SingleCharacterCommandLineArg<out ActionOutput> : CommandLineArg<Actio
      * non-whitespace characters
      */
     override val regex: Regex
-        get() = Regex("^${prefix}[^-\\s]*?$singleCharacterArgument[^-\\s]*?\$")
+        get() = Regex("^$prefix[^$prefix\\s]*?${Pattern.quote(singleCharacterArgument.toString())}[^$prefix\\s]*?\$")
+
+
+    override val allArgumentStrings: Collection<String> get() = listOf("$prefix$singleCharacterArgument")
 
     companion object {
         val prefix = "-"
     }
 }
+
 
 /**
  * Copyright BHStudios ©2016 BH-1-PS. Made for Snek.
@@ -76,12 +93,17 @@ interface FullTextCommandLineArg<out ActionOutput> : CommandLineArg<ActionOutput
      * Matches two hyphens and the full text argument
      */
     override val regex: Regex
-        get() = Regex("^${prefix}$fullTextArgument\$")
+        get() = Regex("^$prefix$fullTextArgument\$")
+
+
+    override val allArgumentStrings: Collection<String> get() = listOf("$prefix$fullTextArgument")
+
 
     companion object {
         val prefix = SingleCharacterCommandLineArg.prefix + SingleCharacterCommandLineArg.prefix
     }
 }
+
 
 /**
  * Copyright BHStudios ©2016 BH-1-PS. Made for Snek.
@@ -99,6 +121,7 @@ interface CommandLineArg<out ActionOutput> {
      */
     val description: String
 
+
     /**
      * The action to be taken if this argument is passed.
      *
@@ -109,11 +132,64 @@ interface CommandLineArg<out ActionOutput> {
      */
     val action: (parameters: Array<String>) -> ActionOutput
 
+
     /**
      * A regular expression that will match this argument
      */
     val regex: Regex
+
+
+    /**
+     * A collection of all arguments as strings, like `["-a <subarg>", "--argument <subarg>"]`
+     */
+    val allArgumentStrings: Collection<String>
+
+
+
+    companion object Defaults {
+        class HelpArg(commandName: String, allArgs: Collection<CommandLineArg<*>>, maximumWidth: Integer = 80, stream: OutputStream)
+            : CompleteCommandLineArg<Unit>(
+                singleCharacterArgument = '?',
+                fullTextArgument = "help",
+                description = "Display this message",
+                action = {}) {
+
+            private val minimumMargin = maximumWidth / 3
+
+            override val action: (Array<String>) -> Unit = {
+                val output = StringBuilder("usage: ").append(commandName).append(" ")
+                val allArgsIncludingThisOne = allArgs.toList() + this
+
+                val indent = output.length
+                val argumentSummaryWidth = max(maximumWidth - indent, minimumMargin)
+                val argumentSummaryLeadingPadding = " ".repeat(indent)
+
+                val argumentStrings = allArgsIncludingThisOne
+                        .map { it.allArgumentStrings.toString(prefix = "[", glue = " | ", suffix = "]") }
+
+                val argumentSummaryLines = MutableList(StringBuilder())
+
+                argumentStrings.forEach { argumentString ->
+                    val currentLine = argumentSummaryLines.last
+                    if (currentLine.length + argumentString.length + 1 > argumentSummaryWidth) {
+                        argumentSummaryLines.add(StringBuilder(argumentString))
+                    } else {
+                        currentLine.append(" ").append(argumentString)
+                    }
+                }
+
+                argumentSummaryLines.forEach { line ->
+                    output.append(line).append("\r\n").append(argumentSummaryLeadingPadding)
+                }
+
+                log.debug("TODO: More help")
+
+                stream.write(output.append("\r\n\r\n").toString())
+            }
+        }
+    }
 }
+
 
 /**
  * Copyright BHStudios ©2016 BH-1-PS. Made for Snek.
@@ -130,6 +206,7 @@ abstract class CommandlineArgCollection {
 
     fun parse(args: Array<String>) = _parser.parseArgs(args)
 }
+
 
 /**
  * Copyright BHStudios ©2016 BH-1-PS. Made for Snek.
@@ -154,6 +231,7 @@ open class CommandLineArgParser(val expectedArgs: CommandlineArgCollection) {
         }.filterNotNull()
     }
 }
+
 
 /**
  * Copyright BHStudios ©2016 BH-1-PS. Made for Snek.
