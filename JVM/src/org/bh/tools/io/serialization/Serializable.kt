@@ -64,7 +64,7 @@ class JsonSerializatinFactory<FromType : Any> : SerializationFactory<FromType, S
 
     @Suppress("UNCHECKED_CAST") // manually checked
     override fun deserialize(serialized: String, vararg unusedTypeSample: FromType): FromType {
-        return gson.fromJson(serialized, unusedTypeSample.javaClass.componentType as Class<FromType>)
+        return gson.fromJson(serialized, unusedTypeSample::class.java.componentType as Class<FromType>)
     }
 }
 
@@ -91,4 +91,4 @@ val <FromType> FromType.jsonValue: String get() = _sharedGson.toJson(this)
 @Suppress("UNCHECKED_CAST")
 fun <FromType> String.fromJson(vararg unusedTypeSample: FromType): FromType = _sharedGson.fromJson(this,
         unusedTypeSample
-        .javaClass.componentType as Class<FromType>)
+        ::class.java.componentType as Class<FromType>)
