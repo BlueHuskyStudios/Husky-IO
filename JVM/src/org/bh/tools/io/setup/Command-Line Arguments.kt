@@ -2,6 +2,7 @@ package org.bh.tools.io.setup
 
 import org.bh.tools.base.abstraction.Integer
 import org.bh.tools.base.collections.*
+import org.bh.tools.base.collections.extensions.*
 import org.bh.tools.base.math.max
 import org.bh.tools.io.logging.log
 import org.bh.tools.io.logging.write
@@ -147,21 +148,34 @@ interface CommandLineArg<out ActionOutput> {
 
 
     companion object Defaults {
-        class HelpArg(commandName: String, allArgs: Collection<CommandLineArg<*>>, maximumWidth: Integer = 80, stream: OutputStream)
-            : CompleteCommandLineArg<Unit>(
+
+        /**
+         * A standard help argument (`-?` or `--help`).
+         *
+         * @param executableName The name of the executable which the user types in the command line
+         * @param allArgs        The arguments that should show up in `help`
+         * @param rightMargin    _optional_ = The character width of the console/terminal
+         * @param stream         _optional_ = The stream to which the help text will be printed
+         */
+        class HelpArg(executableName: String,
+                      allArgs: Collection<CommandLineArg<*>>,
+                      rightMargin: Integer = 80,
+                      stream: OutputStream = System.out
+        ) : CompleteCommandLineArg<Unit>(
                 singleCharacterArgument = '?',
                 fullTextArgument = "help",
                 description = "Display this message",
-                action = {}) {
+                action = {}
+        ) {
 
-            private val minimumMargin = maximumWidth / 3
+            private val minimumMargin = rightMargin / 3
 
             override val action: (Array<String>) -> Unit = {
-                val output = StringBuilder("usage: ").append(commandName).append(" ")
+                val output = StringBuilder("usage: ").append(executableName).append(" ")
                 val allArgsIncludingThisOne = allArgs.toList() + this
 
                 val indent = output.length
-                val argumentSummaryWidth = max(maximumWidth - indent, minimumMargin)
+                val argumentSummaryWidth = max(rightMargin - indent, minimumMargin)
                 val argumentSummaryLeadingPadding = " ".repeat(indent)
 
                 val argumentStrings = allArgsIncludingThisOne
