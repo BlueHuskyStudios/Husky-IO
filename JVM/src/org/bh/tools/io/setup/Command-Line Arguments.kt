@@ -1,8 +1,10 @@
+@file:Suppress("unused")
+
 package org.bh.tools.io.setup
 
 import org.bh.tools.base.abstraction.Integer
-import org.bh.tools.base.collections.*
 import org.bh.tools.base.collections.extensions.*
+import org.bh.tools.base.func.tuple
 import org.bh.tools.base.math.max
 import org.bh.tools.io.logging.log
 import org.bh.tools.io.logging.write
@@ -123,6 +125,7 @@ interface CommandLineArg<out ActionOutput> {
     val description: String
 
 
+    @Suppress("KDocUnresolvedReference")
     /**
      * The action to be taken if this argument is passed.
      *
@@ -213,10 +216,10 @@ interface CommandLineArg<out ActionOutput> {
  * @author Kyli Rouge
  * @since 2016-11-02
  */
-abstract class CommandlineArgCollection {
-    abstract val args: Array<CommandLineArg<*>>
+abstract class CommandlineArgCollection<out ActionOutput, Argument: CommandLineArg<ActionOutput>> {
+    abstract val args: Array<Argument>
 
-    private val _parser: CommandLineArgParser by lazy { CommandLineArgParser(this) }
+    private val _parser: CommandLineArgParser<ActionOutput, Argument> by lazy { CommandLineArgParser(this) }
 
     fun parse(args: Array<String>) = _parser.parseArgs(args)
 }
@@ -232,16 +235,18 @@ abstract class CommandlineArgCollection {
  * @author Kyli Rouge
  * @since 2016-11-04
  */
-open class CommandLineArgParser(val expectedArgs: CommandlineArgCollection) {
+open class CommandLineArgParser<out ActionOutput, Argument: CommandLineArg<ActionOutput>>(
+        val expectedArgs: CommandlineArgCollection<ActionOutput, Argument>
+) {
     /**
      * Parses the given strings into arguments. Does not support argument parameters like `-o /path/to/file.txt`.
      *
      * TODO: Support argument parameters
      */
-    fun parseArgs(userArgs: Array<String>): List<CommandLineArg<*>> {
+    fun parseArgs(userArgs: Array<String>): List<Argument> {
         return userArgs.filterMap { arg ->
             val match = expectedArgs.args.firstOrNull { it.regex.matches(arg) }
-            Pair(match != null, { match })
+            tuple(match != null, { match })
         }.filterNotNull()
     }
 }
@@ -257,7 +262,9 @@ open class CommandLineArgParser(val expectedArgs: CommandlineArgCollection) {
  * @author Kyli Rouge
  * @since 2016-11-04
  */
-open class CommandLineArgProcessor(val expectedArgs: CommandlineArgCollection) {
+open class CommandLineArgProcessor<out ActionOutput, Argument: CommandLineArg<ActionOutput>>(
+        val expectedArgs: CommandlineArgCollection<ActionOutput, Argument>
+) {
     fun process(userArgs: Array<String>) {
         this.expectedArgs.parse(userArgs).forEach { it.action(emptyArray()) }
     }
