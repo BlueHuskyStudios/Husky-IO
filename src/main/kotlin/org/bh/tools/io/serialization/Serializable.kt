@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package org.bh.tools.io.serialization
 
 import com.google.gson.Gson
@@ -54,9 +56,9 @@ interface SerializationFactory<FromType, ToType> {
  * @author Kyli Rouge
  * @since 2016-11-01
  */
-class JsonSerializatinFactory<FromType : Any> : SerializationFactory<FromType, String> {
+class JsonSerializationFactory<FromType : Any> : SerializationFactory<FromType, String> {
 
-    val gson = Gson()
+    private val gson = Gson()
 
     override fun serialize(unserialized: FromType): String {
         return gson.toJson(unserialized)

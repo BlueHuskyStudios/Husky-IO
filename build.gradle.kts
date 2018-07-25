@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("kotlin2js") version "1.2.51"
-    kotlin("jvm") version "1.2.51"
+//    id("kotlin2js").version("1.2.51")
+    kotlin("jvm").version("1.2.51")
 }
 
 group = "org.bh.tools.io"
@@ -15,6 +15,12 @@ repositories {
 dependencies {
     compile(kotlin("stdlib-jdk8"))
     compile(kotlin("stdlib-js"))
+
+    implementation("com.google.code.gson:gson:2.8.5")
+
+    compile(kotlin("reflect"))
+    testCompile(kotlin("test"))
+    testCompile(kotlin("test-junit"))
 }
 
 tasks.withType<KotlinCompile> {
