@@ -8,7 +8,7 @@ package org.bh.tools.io.databases
  */
 interface Database<Query, Contents, Self>
         where Self: Database<Query, Contents, Self> {
-    fun retrieve(using: Query): Contents
+    fun retrieve(using: Query, result: (Contents) -> Unit)
 }
 
 
