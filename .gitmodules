@@ -1,3 +1,6 @@
-[submodule "JVM/lib/gson"]
-	path = JVM/lib/gson
+[submodule "lib/gson"]
+	path = lib/gson
 	url = https://github.com/google/gson.git
+[submodule "lib/Exposed"]
+	path = lib/Exposed
+	url = https://github.com/JetBrains/Exposed.git
